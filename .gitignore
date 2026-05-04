@@ -1,0 +1,14 @@
+# Java
+*.class
+
+# Eclipse
+.settings/
+.project
+.classpath
+
+# build
+bin/
+out/
+
+#data
+products.txt
