@@ -4,23 +4,23 @@ import java.util.Map;
 
 public class ProductService {
 
-	static void addStock(Map<Integer, Product> products, int id, int amount) {
+	static void addStock(Map<Integer, Product> products, int internalId, int amount) {
 		if (amount <= 0) {
 			return;
 		} else {
-			if (products.get(id) != null) {
-				products.get(id).addStock(amount);
+			if (products.get(internalId) != null) {
+				products.get(internalId).addStock(amount);
 			}
 		}
 	}
 
-	static void removeStock(Map<Integer, Product> products, int id, int amount) {
+	static void removeStock(Map<Integer, Product> products, int internalId, int amount) {
 		if (amount <= 0) {
 			return;
 		}
 
-		if (products.get(id) != null) {
-			products.get(id).removeStock(amount);
+		if (products.get(internalId) != null) {
+			products.get(internalId).removeStock(amount);
 		}
 	}
 
@@ -34,12 +34,12 @@ public class ProductService {
 		}
 	}
 
-	static void showPersonalStockStatus(Map<Integer, Product> products, int id) {
-		if (products.get(id) != null) {
-			if (products.get(id).isOutOfStock()) {
-				System.out.println(products.get(id).getName() + "：在庫がありません");
+	static void showPersonalStockStatus(Map<Integer, Product> products, int internalId) {
+		if (products.get(internalId) != null) {
+			if (products.get(internalId).isOutOfStock()) {
+				System.out.println(products.get(internalId).getName() + "：在庫がありません");
 			} else {
-				System.out.println(products.get(id).getName() + "の在庫数：" + products.get(id).getStock());
+				System.out.println(products.get(internalId).getName() + "の在庫数：" + products.get(internalId).getStock());
 			}
 		}
 	}
