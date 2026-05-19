@@ -7,46 +7,47 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProductRepository {
-	private Map<Integer, Product> productByInternalId = new HashMap<>(); //内部IDから商品を得るハッシュマップ
-	private Map<String, Integer> InternalIdByName = new HashMap<>(); //名前から内部Idを得るハッシュマップ
+	private Map<Integer, Product> productByInternalProductId = new HashMap<>(); //内部IDから商品を得るハッシュマップ
+	private Map<String, Integer> internalProductIdByName = new HashMap<>(); //名前から内部Idを得るハッシュマップ
 	private int count = 0; //内部IDの作成に使用する
 
 	//内部IDの作成
-	private int makeId() {
+	private int makeInternalProductID() {
 		count++;
 		return count;
 	}
 
 	//現在の内部IDの最大値を得る
-	private void getCount(int maxId) {
-		count = maxId;
+	private void getCount(int maxProductId) {
+		count = maxProductId;
 	}
 
-	public void addProduct(String id, String name, int price, int addStock) {
-		int internalId = makeId();
-		productByInternalId.put(internalId, new Product(internalId, id, name, price, addStock));
-		InternalIdByName.put(name, internalId);
+	public void addProduct(String productId, String name, int price, int addStock) {
+		int internalProductId = makeInternalProductID();
+		productByInternalProductId.put(internalProductId,
+				new Product(internalProductId, productId, name, price, addStock));
+		internalProductIdByName.put(name, internalProductId);
 	}
 
 	public void removeProduct(String name) {
-		int internalId = InternalIdByName.get(name);
-		InternalIdByName.remove(name);
-		productByInternalId.remove(internalId);
+		int internalProductId = internalProductIdByName.get(name);
+		internalProductIdByName.remove(name);
+		productByInternalProductId.remove(internalProductId);
 	}
 
 	//入力された名前に一致する商品を取り出す。在庫の追加・削減で使用している。
 	public Product findProduct(String name) {
-		Integer id = InternalIdByName.get(name);
-		if (id != null) {
-			return productByInternalId.get(id);
+		Integer productId = internalProductIdByName.get(name);
+		if (productId != null) {
+			return productByInternalProductId.get(productId);
 		}
 		return null;
 	}
 
 	//名前にキーワードを含む商品のデータを表示する
 	public void findProductByNameKeyword(String keyword) {
-		for (Product p : productByInternalId.values()) {
-			if (p.getName().toLowerCase().contains(keyword.toLowerCase())) {
+		for (Product p : productByInternalProductId.values()) {
+			if (p.getProductName().toLowerCase().contains(keyword.toLowerCase())) {
 				System.out.println(p);
 			}
 		}
@@ -54,8 +55,8 @@ public class ProductRepository {
 
 	//IDにキーワードを含む商品のデータを表示する
 	public void findProductByIdKeyword(String keyword) {
-		for (Product p : productByInternalId.values()) {
-			if (p.getId().toLowerCase().contains(keyword.toLowerCase())) {
+		for (Product p : productByInternalProductId.values()) {
+			if (p.getProductId().toLowerCase().contains(keyword.toLowerCase())) {
 				System.out.println(p);
 			}
 		}
@@ -63,15 +64,15 @@ public class ProductRepository {
 
 	//すべての商品データを表示する
 	public void showProduct() {
-		for (Product p : productByInternalId.values()) {
+		for (Product p : productByInternalProductId.values()) {
 			System.out.println(p);
 		}
 	}
 
 	//在庫がない商品のデータを表示する
 	public void showNoStockProduct() {
-		for (Product p : productByInternalId.values()) {
-			if (p.getStock() == 0) {
+		for (Product p : productByInternalProductId.values()) {
+			if (p.getProductStock() == 0) {
 				System.out.println(p);
 			}
 		}
@@ -79,13 +80,13 @@ public class ProductRepository {
 
 	//商品が存在するかの確認
 	public boolean productExist(String name) {
-		return InternalIdByName.containsKey(name);
+		return internalProductIdByName.containsKey(name);
 	}
 
 	//商品名にキーワードを含むものが存在するかの確認
 	public boolean productNameKeywordExist(String keyword) {
-		for (Product p : productByInternalId.values()) {
-			if (p.getName().toLowerCase().contains(keyword.toLowerCase())) {
+		for (Product p : productByInternalProductId.values()) {
+			if (p.getProductName().toLowerCase().contains(keyword.toLowerCase())) {
 				return true;
 			}
 		}
@@ -94,8 +95,8 @@ public class ProductRepository {
 
 	//IDにキーワードを含む商品が存在するかの確認
 	public boolean productIdKeywordExist(String keyword) {
-		for (Product p : productByInternalId.values()) {
-			if (p.getId().toLowerCase().contains(keyword.toLowerCase())) {
+		for (Product p : productByInternalProductId.values()) {
+			if (p.getProductId().toLowerCase().contains(keyword.toLowerCase())) {
 				return true;
 			}
 		}
@@ -103,33 +104,33 @@ public class ProductRepository {
 	}
 
 	//商品名の変更
-	public boolean changeName(String oldName, String newName) {
-		Integer internalId = InternalIdByName.get(oldName);
+	public boolean changeProductName(String oldName, String newName) {
+		Integer internalProductId = internalProductIdByName.get(oldName);
 
-		if (internalId == null) {
+		if (internalProductId == null) {
 			System.out.println("商品が存在しません");
 			return false;
 		}
 
-		Product p = productByInternalId.get(internalId);
+		Product p = productByInternalProductId.get(internalProductId);
 
-		if (InternalIdByName.containsKey(newName)) {
+		if (internalProductIdByName.containsKey(newName)) {
 			System.out.println("同じ名前の商品が既に存在します");
 			return false;
 		}
 
-		p.changeName(newName);
-		InternalIdByName.remove(oldName);
-		InternalIdByName.put(newName, internalId);
+		p.changeProductName(newName);
+		internalProductIdByName.remove(oldName);
+		internalProductIdByName.put(newName, internalProductId);
 		return true;
 	}
 
 	//ファイルにデータを書き込む
 	public void saveToFile() {
 		try (PrintWriter pw = new PrintWriter("products.txt")) {
-			for (Product p : productByInternalId.values()) {
-				pw.println(p.getInternalId() + "," + p.getId() + "," + p.getName() + "," + p.getPrice() + ","
-						+ p.getStock());
+			for (Product p : productByInternalProductId.values()) {
+				pw.println(p.getInternalProductId() + "," + p.getProductId() + "," + p.getProductName() + "," + p.getProductPrice() + ","
+						+ p.getProductStock());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -147,16 +148,17 @@ public class ProductRepository {
 				if (parts.length != 5)
 					continue;
 
-				int internalId = Integer.parseInt(parts[0].trim());
-				String id = parts[1].trim();
+				int internalProductId = Integer.parseInt(parts[0].trim());
+				String productID = parts[1].trim();
 				String name = parts[2].trim();
 				int price = Integer.parseInt(parts[3].trim());
 				int stock = Integer.parseInt(parts[4].trim());
 
-				if (internalId > maxId)
-					maxId = internalId;
-				InternalIdByName.put(name, internalId);
-				productByInternalId.put(internalId, new Product(internalId, id, name, price, stock));
+				if (internalProductId > maxId)
+					maxId = internalProductId;
+				internalProductIdByName.put(name, internalProductId);
+				productByInternalProductId.put(internalProductId,
+						new Product(internalProductId, productID, name, price, stock));
 
 			}
 

@@ -2,10 +2,10 @@ package 在庫管理システム;
 
 import java.util.Scanner;
 
-public class InventoryCLI {
+public class MaterialInventoryCLI {
+
 	private Scanner sc = new Scanner(System.in);
-	private ProductRepository repo = new ProductRepository();
-	MaterialInventoryCLI mcli = new MaterialInventoryCLI();
+	private MaterialRepository repo = new MaterialRepository();
 
 	private int inputInt(String message) {
 		while (true) {
@@ -54,52 +54,15 @@ public class InventoryCLI {
 		}
 	}
 
-	public void start() {
-
-		repo.loadFromFile();
-
-		while (true) {
-			System.out.println("1:商品の操作　2:材料の操作　0:終了");
-
-			String choiceStr = sc.nextLine();
-			int choice;
-			try {
-				choice = Integer.parseInt(choiceStr);
-			} catch (NumberFormatException e) {
-				System.out.println("正しい数字を入力してください");
-				continue;
-			}
-
-			switch (choice) {
-			case 1:
-
-				productStart();
-				break;
-
-			case 2: //商品追加
-
-				mcli.Start();
-				break;
-
-			case 0:
-
-				System.out.println("***終了***");
-				repo.saveToFile();
-				mcli.saveMaterial();
-				sc.close();
-				return;
-
-			default:
-				System.out.println("正しい数字を入力してください");
-			}
-		}
+	public void saveMaterial() {
+		repo.saveToFile();
 	}
 
-	public void productStart() {
+	public void Start() {
 		repo.loadFromFile();
 
 		while (true) {
-			System.out.println("1:商品一覧　2:商品追加　3:在庫の追加・削減　4:キーワード検索　5:商品名変更　6:商品削除　7:在庫切れの商品一覧　0:戻る");
+			System.out.println("1:材料一覧　2:材料追加　3:在庫の追加・削減　4:キーワード検索　5:材料名変更　6:材料削除　7:在庫切れの材料一覧　0:戻る");
 
 			String choiceStr = sc.nextLine();
 			int choice;
@@ -113,18 +76,18 @@ public class InventoryCLI {
 			switch (choice) {
 			case 1:
 
-				System.out.println("===商品一覧===");
-				repo.showProduct();
+				System.out.println("===材料一覧===");
+				repo.showAllMaterial();
 				break;
 
-			case 2: //商品追加
+			case 2: //材料追加
 
-				addProduct();
+				addMaterial();
 				break;
 
 			case 3: //在庫の追加・削減
 
-				changeProductStock();
+				changeMaterialStock();
 				break;
 
 			case 4: //キーワード検索
@@ -132,20 +95,20 @@ public class InventoryCLI {
 				keywordSearch();
 				break;
 
-			case 5: //商品名変更
+			case 5: //材料名変更
 
 				changeName();
 				break;
 
-			case 6: //商品削除
+			case 6: //材料削除
 
-				removeProduct();
+				removeMaterial();
 				break;
 
 			case 7:
 
-				System.out.println("===在庫切れの商品一覧===");
-				repo.showNoStockProduct();
+				System.out.println("===在庫切れの材料一覧===");
+				repo.showNoStockMaterial();
 				break;
 
 			case 0:
@@ -159,16 +122,16 @@ public class InventoryCLI {
 		}
 	}
 
-	private void addProduct() {
-		System.out.println("===商品追加===");
+	private void addMaterial() {
+		System.out.println("===材料追加===");
 
 		while (true) {
 
 			String id = inputString("ID");
 
-			String name = inputString("商品名");
-			if (repo.productExist(name)) {
-				System.out.println("既に同じ名前の商品があります");
+			String name = inputString("材料名");
+			if (repo.materialExist(name)) {
+				System.out.println("既に同じ名前の材料があります");
 
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
@@ -194,8 +157,8 @@ public class InventoryCLI {
 			}
 
 			if (confirm("この内容で追加しますか？")) {
-				System.out.println("商品を追加しました");
-				repo.addProduct(id, name, price, addStock);
+				System.out.println("材料を追加しました");
+				repo.addMaterial(id, name, price, addStock);
 				break;
 			}
 
@@ -211,14 +174,14 @@ public class InventoryCLI {
 
 	}
 
-	private void changeProductStock() {
+	private void changeMaterialStock() {
 		System.out.println("===在庫の追加・削減===");
 
 		while (true) {
 
-			String name = inputString("商品名");
-			if (!repo.productExist(name)) {
-				System.out.println("入力された名前の商品は存在しません");
+			String name = inputString("材料名");
+			if (!repo.materialExist(name)) {
+				System.out.println("入力された名前の材料は存在しません");
 				continue;
 			}
 
@@ -227,7 +190,7 @@ public class InventoryCLI {
 				//在庫の増加を選んだ場合
 				int amountAdd = inputInt("追加数を入力してください");
 
-				if (!confirm("商品名:" + name + "   追加数:" + amountAdd + "でよろしいですか？")) {
+				if (!confirm("材料名:" + name + "   追加数:" + amountAdd + "でよろしいですか？")) {
 					if (confirm("入力をやり直しますか？")) {
 						System.out.println("入力をやり直します");
 						continue;
@@ -238,11 +201,9 @@ public class InventoryCLI {
 				}
 
 				if (amountAdd > 0) {
-					if (repo.findProduct(name).addProductStock(amountAdd)) {
-						System.out.println("在庫を追加しました");
+					if (repo.addMaterialStock(name, amountAdd)) {
 						break;
 					} else {
-						System.out.println("0より大きい値を入れてください");
 						if (confirm("入力をやり直しますか？")) {
 							System.out.println("入力をやり直します");
 							continue;
@@ -256,7 +217,7 @@ public class InventoryCLI {
 
 			//在庫の削減を選んだ場合
 			int amountRemove = inputInt("削減数を入力してください");
-			if (!confirm("商品名:" + name + "   削減数:" + amountRemove + "でよろしいですか？")) {
+			if (!confirm("材料名:" + name + "   削減数:" + amountRemove + "でよろしいですか？")) {
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
 					continue;
@@ -267,11 +228,9 @@ public class InventoryCLI {
 			}
 
 			if (amountRemove > 0) {
-				if (repo.findProduct(name).removeProductStock(amountRemove)) {
-					System.out.println("在庫を削減しました");
+				if (repo.removeMaterialStock(name, amountRemove)) {
 					break;
 				} else {
-					System.out.println("在庫不足または0以下の値は指定できません");
 					if (confirm("入力をやり直しますか？")) {
 						System.out.println("入力をやり直します");
 						continue;
@@ -281,25 +240,24 @@ public class InventoryCLI {
 					}
 				}
 			}
-
 		}
 	}
 
 	private void keywordSearch() {
 		System.out.println("===キーワード検索===");
 		while (true) {
-			if (confirm("商品名から検索する場合はyを、IDから検索する場合はnを入力してください")) {
+			if (confirm("材料名から検索する場合はyを、IDから検索する場合はnを入力してください")) {
 
 				//商品名からの検索
-				System.out.println("商品名から検索を行います");
+				System.out.println("材料名から検索を行います");
 				String keywordName = inputString("キーワード");
-				if (repo.productNameKeywordExist(keywordName)) {
-					System.out.println("キーワードに一致する商品が見つかりました");
-					repo.findProductByNameKeyword(keywordName);
+				if (repo.materialNameKeywordExist(keywordName)) {
+					System.out.println("キーワードに一致する材料が見つかりました");
+					repo.findMaterialByNameKeyword(keywordName);
 					break;
 				}
 
-				System.out.println("キーワードに一致する商品は見つかりませんでした");
+				System.out.println("キーワードに一致する材料は見つかりませんでした");
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
 					continue;
@@ -312,12 +270,12 @@ public class InventoryCLI {
 			//IDからの検索
 			System.out.println("IDから検索を行います");
 			String keywordID = inputString("キーワード");
-			if (repo.productIdKeywordExist(keywordID)) {
-				System.out.println("キーワードに一致する商品が見つかりました");
-				repo.findProductByIdKeyword(keywordID);
+			if (repo.materialIdKeywordExist(keywordID)) {
+				System.out.println("キーワードに一致する材料が見つかりました");
+				repo.findMaterialByIdKeyword(keywordID);
 			}
 
-			System.out.println("キーワードに一致する商品は見つかりませんでした");
+			System.out.println("キーワードに一致する材料は見つかりませんでした");
 			if (confirm("入力をやり直しますか？")) {
 				System.out.println("入力をやり直します");
 				continue;
@@ -329,12 +287,12 @@ public class InventoryCLI {
 	}
 
 	private void changeName() {
-		System.out.println("===商品名変更===");
+		System.out.println("===材料名変更===");
 		while (true) {
-			String oldName = inputString("商品名");
+			String oldName = inputString("材料名");
 
-			String newName = inputString("変更後の商品名");
-			if (!repo.changeProductName(oldName, newName)) {
+			String newName = inputString("変更後の材料名");
+			if (!repo.changeMaterialName(oldName, newName)) {
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
 					continue;
@@ -343,17 +301,16 @@ public class InventoryCLI {
 					break;
 				}
 			}
-			System.out.println("商品名を変更しました");
 			break;
 		}
 	}
 
-	private void removeProduct() {
-		System.out.println("===商品削除===");
+	private void removeMaterial() {
+		System.out.println("===材料削除===");
 		while (true) {
-			String name = inputString("商品名");
-			if (!repo.productExist(name)) {
-				System.out.println("入力された名前の商品は存在しません");
+			String name = inputString("材料名");
+			if (!repo.materialExist(name)) {
+				System.out.println("入力された名前の材料は存在しません");
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
 					continue;
@@ -367,8 +324,9 @@ public class InventoryCLI {
 				System.out.println("選択画面に戻ります");
 				break;
 			}
-			repo.removeProduct(name);
-			System.out.println("商品を削除しました");
+
+			System.out.println("材料を削除しました");
+			repo.removeMaterial(name);
 
 			break;
 		}

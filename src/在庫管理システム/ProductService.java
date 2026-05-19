@@ -4,42 +4,42 @@ import java.util.Map;
 
 public class ProductService {
 
-	static void addStock(Map<Integer, Product> products, int internalId, int amount) {
+	static void addProductStock(Map<Integer, Product> products, int internalId, int amount) {
 		if (amount <= 0) {
 			return;
 		} else {
 			if (products.get(internalId) != null) {
-				products.get(internalId).addStock(amount);
+				products.get(internalId).addProductStock(amount);
 			}
 		}
 	}
 
-	static void removeStock(Map<Integer, Product> products, int internalId, int amount) {
+	static void removeProductStock(Map<Integer, Product> products, int internalId, int amount) {
 		if (amount <= 0) {
 			return;
 		}
 
 		if (products.get(internalId) != null) {
-			products.get(internalId).removeStock(amount);
+			products.get(internalId).removeProductStock(amount);
 		}
 	}
 
-	static void showAllStockStatus(Map<Integer, Product> products) {
+	static void showAllProductStockStatus(Map<Integer, Product> products) {
 		for (Product p : products.values()) {
-			if (p.isOutOfStock()) {
-				System.out.println(p.getName() + "は在庫がありません");
+			if (p.productIsOutOfStock()) {
+				System.out.println(p.getProductName() + "は在庫がありません");
 			} else {
 				System.out.println(p);
 			}
 		}
 	}
 
-	static void showPersonalStockStatus(Map<Integer, Product> products, int internalId) {
+	static void showPersonalProductStockStatus(Map<Integer, Product> products, int internalId) {
 		if (products.get(internalId) != null) {
-			if (products.get(internalId).isOutOfStock()) {
-				System.out.println(products.get(internalId).getName() + "：在庫がありません");
+			if (products.get(internalId).productIsOutOfStock()) {
+				System.out.println(products.get(internalId).getProductName() + "：在庫がありません");
 			} else {
-				System.out.println(products.get(internalId).getName() + "の在庫数：" + products.get(internalId).getStock());
+				System.out.println(products.get(internalId).getProductName() + "の在庫数：" + products.get(internalId).getProductStock());
 			}
 		}
 	}

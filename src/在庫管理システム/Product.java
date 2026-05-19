@@ -1,67 +1,67 @@
 package 在庫管理システム;
 
 public class Product {
-	private final int internalId; //内部ID
-	private String id; //外部ID
-	private String name; //商品名
-	private int price; //価格
-	private int stock; //在庫数
+	private final int internalProductId; //商品の内部ID
+	private String productId; //商品の外部ID
+	private String productName; //商品名
+	private int productPrice; //価格
+	private int productStock; //在庫数
 
-	public Product(int internalId, String id, String name, int price, int stock) {
+	public Product(int internalId, String id, String productName, int price, int stock) {
 		if (price < 0 || stock < 0) {
 			throw new IllegalArgumentException("不正な入力値");
 		}
-		this.internalId = internalId;
-		this.id = id;
-		this.name = name;
-		this.price = price;
-		this.stock = stock;
+		this.internalProductId = internalId;
+		this.productId = id;
+		this.productName = productName;
+		this.productPrice = price;
+		this.productStock = stock;
 	}
 
-	public int getInternalId() {
-		return internalId;
+	public int getInternalProductId() {
+		return internalProductId;
 	}
 
-	public String getId() {
-		return id;
+	public String getProductId() {
+		return productId;
 	}
 
-	public String getName() {
-		return name;
+	public String getProductName() {
+		return productName;
 	}
 
-	public int getPrice() {
-		return price;
+	public int getProductPrice() {
+		return productPrice;
 	}
 
-	public int getStock() {
-		return stock;
+	public int getProductStock() {
+		return productStock;
 	}
 
-	public void changeName(String newName) {
-		name = newName;
+	public void changeProductName(String newName) {
+		productName = newName;
 	}
 
 	@Override
 	public String toString() {
-		return "ID: " + id + "　商品名: " + name + "　価格: " + price + "　在庫数: " + stock;
+		return "ID: " + productId + "　商品名: " + productName + "　価格: " + productPrice + "　在庫数: " + productStock;
 	}
 
-	public boolean isOutOfStock() {
-		return stock == 0;
+	public boolean productIsOutOfStock() {
+		return productStock == 0;
 	}
 
-	public boolean addStock(int amount) {
+	public boolean addProductStock(int amount) {
 		if (amount <= 0)
 			return false;
-		stock += amount;
+		productStock += amount;
 		return true;
 	}
 
-	public boolean removeStock(int amount) {
-		if (amount <= 0 || stock < amount)
+	public boolean removeProductStock(int amount) {
+		if (amount <= 0 || productStock < amount)
 			return false;
-		stock -= amount;
+		productStock -= amount;
 		return true;
 	}
 }
