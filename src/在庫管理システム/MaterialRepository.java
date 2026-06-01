@@ -3,7 +3,9 @@ package 在庫管理システム;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MaterialRepository {
 	private HashMap<Integer, Material> materialByInternalMaterialId = new HashMap<>();
@@ -21,6 +23,27 @@ public class MaterialRepository {
 		count = maxId;
 	}
 
+	//材料名から材料の内部IDを取得する
+	public int getInternalMaterialIdByMaterialName(String materialName) {
+		return internalMaterialIdByMaterialName.get(materialName);
+	}
+
+	//材料IDから材料の内部IDを取得する
+	public int getInternalMaterialIdByMaterialId(String materialId) {
+		for (Material m : materialByInternalMaterialId.values()) {
+			if (m.getMaterialId().equals(materialId)) {
+				return m.getInternalMaterialId();
+			}
+		}
+
+		return -1;
+	}
+
+	//材料の内部IDから材料を取得する
+	public Material getMaterialByInternalMaterialId(int internalMaterialId) {
+		return materialByInternalMaterialId.get(internalMaterialId);
+	}
+
 	//材料の追加
 	public void addMaterial(String materialId, String materialName, int materialPrice, int materialStock) {
 		int internalMaterialId = makeInternalMaterialId();
@@ -31,7 +54,7 @@ public class MaterialRepository {
 
 	//材料の削除
 	public boolean removeMaterial(String materialName) {
-		if (!materialExist(materialName)) {
+		if (!materialExistByName(materialName)) {
 			return false;
 		}
 
@@ -50,7 +73,7 @@ public class MaterialRepository {
 
 	//材料の在庫数の追加
 	public boolean addMaterialStock(String materialName, int amount) {
-		if (materialExist(materialName)) {
+		if (materialExistByName(materialName)) {
 			int internalMaterialId = internalMaterialIdByMaterialName.get(materialName);
 			Material m = materialByInternalMaterialId.get(internalMaterialId);
 
@@ -69,7 +92,7 @@ public class MaterialRepository {
 
 	//材料の在庫数の削減
 	public boolean removeMaterialStock(String materialName, int amount) {
-		if (materialExist(materialName)) {
+		if (materialExistByName(materialName)) {
 			int internalMaterialId = internalMaterialIdByMaterialName.get(materialName);
 			Material m = materialByInternalMaterialId.get(internalMaterialId);
 
@@ -86,8 +109,18 @@ public class MaterialRepository {
 	}
 
 	//入力された名前に一致する材料が存在するかの確認
-	public boolean materialExist(String materialName) {
+	public boolean materialExistByName(String materialName) {
 		return internalMaterialIdByMaterialName.containsKey(materialName);
+	}
+
+	//入力されたIDに一致する材料が存在するかの確認
+	public boolean materialExistById(String materialId) {
+		for (Material m : materialByInternalMaterialId.values()) {
+			if (m.getMaterialId().equals(materialId)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	//名前にキーワードを含む材料があるかの確認
@@ -137,14 +170,25 @@ public class MaterialRepository {
 		}
 	}
 
+	//在庫切れの材料を取得する
+	public List<Integer> getInternalNoStockMaterialId() {
+		List<Integer> internalNoStockMaterialId = new ArrayList<>();
+		for (Material m : materialByInternalMaterialId.values()) {
+			if (m.getMaterialStock() == 0) {
+				internalNoStockMaterialId.add(m.getInternalMaterialId());
+			}
+		}
+		return internalNoStockMaterialId;
+	}
+
 	//材料名の変更
 	public boolean changeMaterialName(String oldName, String newName) {
-		if (!materialExist(oldName)) {
+		if (!materialExistByName(oldName)) {
 			System.out.println("入力された名前の材料は存在しません");
 			return false;
 		}
 
-		if (materialExist(newName)) {
+		if (materialExistByName(newName)) {
 			System.out.println("同じ名前の材料が既に存在します");
 			return false;
 		}

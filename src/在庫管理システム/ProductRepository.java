@@ -22,6 +22,22 @@ public class ProductRepository {
 		count = maxProductId;
 	}
 
+	//商品名から商品の内部IDを取得する
+	public int getInternalProductIdByProductName(String name) {
+		return internalProductIdByName.get(name);
+	}
+
+	//商品IDから商品の内部IDを取得する
+	public int getInternalProductIdByProductId(String productId) {
+		for (Product p : productByInternalProductId.values()) {
+			if (p.getProductId().equals(productId)) {
+				return p.getInternalProductId();
+			}
+		}
+		return -1;
+	}
+
+	//商品の追加
 	public void addProduct(String productId, String name, int price, int addStock) {
 		int internalProductId = makeInternalProductID();
 		productByInternalProductId.put(internalProductId,
@@ -29,10 +45,17 @@ public class ProductRepository {
 		internalProductIdByName.put(name, internalProductId);
 	}
 
+	//商品の削減
 	public void removeProduct(String name) {
 		int internalProductId = internalProductIdByName.get(name);
 		internalProductIdByName.remove(name);
 		productByInternalProductId.remove(internalProductId);
+	}
+
+	//入力された商品の内部IDに対応する商品の情報を表示する。使用材料からの商品検索で使用している。
+	public void showProductByInternalProductId(int internalProductId) {
+		Product p = productByInternalProductId.get(internalProductId);
+		System.out.println(p);
 	}
 
 	//入力された名前に一致する商品を取り出す。在庫の追加・削減で使用している。
@@ -78,9 +101,19 @@ public class ProductRepository {
 		}
 	}
 
-	//商品が存在するかの確認
-	public boolean productExist(String name) {
+	//商品が存在するかの確認(商品名から検索)
+	public boolean productExistByName(String name) {
 		return internalProductIdByName.containsKey(name);
+	}
+
+	//商品が存在するかの確認(商品IDから検索)
+	public boolean productExistByProductId(String productId) {
+		for (Product p : productByInternalProductId.values()) {
+			if (p.getProductId().equals(productId)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	//商品名にキーワードを含むものが存在するかの確認
@@ -129,7 +162,8 @@ public class ProductRepository {
 	public void saveToFile() {
 		try (PrintWriter pw = new PrintWriter("products.txt")) {
 			for (Product p : productByInternalProductId.values()) {
-				pw.println(p.getInternalProductId() + "," + p.getProductId() + "," + p.getProductName() + "," + p.getProductPrice() + ","
+				pw.println(p.getInternalProductId() + "," + p.getProductId() + "," + p.getProductName() + ","
+						+ p.getProductPrice() + ","
 						+ p.getProductStock());
 			}
 		} catch (Exception e) {

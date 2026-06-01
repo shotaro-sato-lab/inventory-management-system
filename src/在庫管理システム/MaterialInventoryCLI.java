@@ -5,7 +5,13 @@ import java.util.Scanner;
 public class MaterialInventoryCLI {
 
 	private Scanner sc = new Scanner(System.in);
-	private MaterialRepository repo = new MaterialRepository();
+	private MaterialRepository materialRepo;
+	private RecipeRepository recipeRepo;
+
+	public MaterialInventoryCLI(MaterialRepository materialRepo, RecipeRepository recipeRepo) {
+		this.materialRepo = materialRepo;
+		this.recipeRepo = recipeRepo;
+	}
 
 	private int inputInt(String message) {
 		while (true) {
@@ -54,12 +60,16 @@ public class MaterialInventoryCLI {
 		}
 	}
 
+	public MaterialRepository getRepo() {
+		return materialRepo;
+	}
+
 	public void saveMaterial() {
-		repo.saveToFile();
+		materialRepo.saveToFile();
 	}
 
 	public void Start() {
-		repo.loadFromFile();
+		materialRepo.loadFromFile();
 
 		while (true) {
 			System.out.println("1:材料一覧　2:材料追加　3:在庫の追加・削減　4:キーワード検索　5:材料名変更　6:材料削除　7:在庫切れの材料一覧　0:戻る");
@@ -77,7 +87,7 @@ public class MaterialInventoryCLI {
 			case 1:
 
 				System.out.println("===材料一覧===");
-				repo.showAllMaterial();
+				materialRepo.showAllMaterial();
 				break;
 
 			case 2: //材料追加
@@ -108,7 +118,7 @@ public class MaterialInventoryCLI {
 			case 7:
 
 				System.out.println("===在庫切れの材料一覧===");
-				repo.showNoStockMaterial();
+				materialRepo.showNoStockMaterial();
 				break;
 
 			case 0:
@@ -130,7 +140,7 @@ public class MaterialInventoryCLI {
 			String id = inputString("ID");
 
 			String name = inputString("材料名");
-			if (repo.materialExist(name)) {
+			if (materialRepo.materialExistByName(name)) {
 				System.out.println("既に同じ名前の材料があります");
 
 				if (confirm("入力をやり直しますか？")) {
@@ -158,7 +168,7 @@ public class MaterialInventoryCLI {
 
 			if (confirm("この内容で追加しますか？")) {
 				System.out.println("材料を追加しました");
-				repo.addMaterial(id, name, price, addStock);
+				materialRepo.addMaterial(id, name, price, addStock);
 				break;
 			}
 
@@ -180,7 +190,7 @@ public class MaterialInventoryCLI {
 		while (true) {
 
 			String name = inputString("材料名");
-			if (!repo.materialExist(name)) {
+			if (!materialRepo.materialExistByName(name)) {
 				System.out.println("入力された名前の材料は存在しません");
 				continue;
 			}
@@ -201,7 +211,7 @@ public class MaterialInventoryCLI {
 				}
 
 				if (amountAdd > 0) {
-					if (repo.addMaterialStock(name, amountAdd)) {
+					if (materialRepo.addMaterialStock(name, amountAdd)) {
 						break;
 					} else {
 						if (confirm("入力をやり直しますか？")) {
@@ -228,7 +238,7 @@ public class MaterialInventoryCLI {
 			}
 
 			if (amountRemove > 0) {
-				if (repo.removeMaterialStock(name, amountRemove)) {
+				if (materialRepo.removeMaterialStock(name, amountRemove)) {
 					break;
 				} else {
 					if (confirm("入力をやり直しますか？")) {
@@ -251,9 +261,9 @@ public class MaterialInventoryCLI {
 				//商品名からの検索
 				System.out.println("材料名から検索を行います");
 				String keywordName = inputString("キーワード");
-				if (repo.materialNameKeywordExist(keywordName)) {
+				if (materialRepo.materialNameKeywordExist(keywordName)) {
 					System.out.println("キーワードに一致する材料が見つかりました");
-					repo.findMaterialByNameKeyword(keywordName);
+					materialRepo.findMaterialByNameKeyword(keywordName);
 					break;
 				}
 
@@ -270,9 +280,9 @@ public class MaterialInventoryCLI {
 			//IDからの検索
 			System.out.println("IDから検索を行います");
 			String keywordID = inputString("キーワード");
-			if (repo.materialIdKeywordExist(keywordID)) {
+			if (materialRepo.materialIdKeywordExist(keywordID)) {
 				System.out.println("キーワードに一致する材料が見つかりました");
-				repo.findMaterialByIdKeyword(keywordID);
+				materialRepo.findMaterialByIdKeyword(keywordID);
 			}
 
 			System.out.println("キーワードに一致する材料は見つかりませんでした");
@@ -292,7 +302,7 @@ public class MaterialInventoryCLI {
 			String oldName = inputString("材料名");
 
 			String newName = inputString("変更後の材料名");
-			if (!repo.changeMaterialName(oldName, newName)) {
+			if (!materialRepo.changeMaterialName(oldName, newName)) {
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
 					continue;
@@ -309,7 +319,7 @@ public class MaterialInventoryCLI {
 		System.out.println("===材料削除===");
 		while (true) {
 			String name = inputString("材料名");
-			if (!repo.materialExist(name)) {
+			if (!materialRepo.materialExistByName(name)) {
 				System.out.println("入力された名前の材料は存在しません");
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
@@ -319,6 +329,13 @@ public class MaterialInventoryCLI {
 					break;
 				}
 			}
+			int internalMaterialId = materialRepo.getInternalMaterialIdByMaterialName(name);
+			if (!recipeRepo.findInternalProductIdByInternalMaterialId(internalMaterialId).isEmpty()) {
+				System.out.println("削除しようとしている材料を使用した商品が登録されています。");
+				System.out.println("材料を削除する前にこの材料を使用している商品の削除を行ってください");
+				System.out.println("選択画面に戻ります");
+				break;
+			}
 
 			if (!confirm("本当に削除してもよろしいですか？")) {
 				System.out.println("選択画面に戻ります");
@@ -326,7 +343,7 @@ public class MaterialInventoryCLI {
 			}
 
 			System.out.println("材料を削除しました");
-			repo.removeMaterial(name);
+			materialRepo.removeMaterial(name);
 
 			break;
 		}

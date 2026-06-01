@@ -4,8 +4,13 @@ import java.util.Scanner;
 
 public class InventoryCLI {
 	private Scanner sc = new Scanner(System.in);
-	private ProductRepository repo = new ProductRepository();
-	MaterialInventoryCLI mcli = new MaterialInventoryCLI();
+	private ProductRepository productRepo;
+	private RecipeRepository recipeRepo;
+
+	public InventoryCLI(ProductRepository productRepo, RecipeRepository recipeRepo) {
+		this.productRepo = productRepo;
+		this.recipeRepo = recipeRepo;
+	}
 
 	private int inputInt(String message) {
 		while (true) {
@@ -54,49 +59,7 @@ public class InventoryCLI {
 		}
 	}
 
-	public void start() {
-
-		repo.loadFromFile();
-
-		while (true) {
-			System.out.println("1:商品の操作　2:材料の操作　0:終了");
-
-			String choiceStr = sc.nextLine();
-			int choice;
-			try {
-				choice = Integer.parseInt(choiceStr);
-			} catch (NumberFormatException e) {
-				System.out.println("正しい数字を入力してください");
-				continue;
-			}
-
-			switch (choice) {
-			case 1:
-
-				productStart();
-				break;
-
-			case 2: //商品追加
-
-				mcli.Start();
-				break;
-
-			case 0:
-
-				System.out.println("***終了***");
-				repo.saveToFile();
-				mcli.saveMaterial();
-				sc.close();
-				return;
-
-			default:
-				System.out.println("正しい数字を入力してください");
-			}
-		}
-	}
-
 	public void productStart() {
-		repo.loadFromFile();
 
 		while (true) {
 			System.out.println("1:商品一覧　2:商品追加　3:在庫の追加・削減　4:キーワード検索　5:商品名変更　6:商品削除　7:在庫切れの商品一覧　0:戻る");
@@ -114,7 +77,7 @@ public class InventoryCLI {
 			case 1:
 
 				System.out.println("===商品一覧===");
-				repo.showProduct();
+				productRepo.showProduct();
 				break;
 
 			case 2: //商品追加
@@ -145,7 +108,7 @@ public class InventoryCLI {
 			case 7:
 
 				System.out.println("===在庫切れの商品一覧===");
-				repo.showNoStockProduct();
+				productRepo.showNoStockProduct();
 				break;
 
 			case 0:
@@ -167,7 +130,7 @@ public class InventoryCLI {
 			String id = inputString("ID");
 
 			String name = inputString("商品名");
-			if (repo.productExist(name)) {
+			if (productRepo.productExistByName(name)) {
 				System.out.println("既に同じ名前の商品があります");
 
 				if (confirm("入力をやり直しますか？")) {
@@ -195,7 +158,7 @@ public class InventoryCLI {
 
 			if (confirm("この内容で追加しますか？")) {
 				System.out.println("商品を追加しました");
-				repo.addProduct(id, name, price, addStock);
+				productRepo.addProduct(id, name, price, addStock);
 				break;
 			}
 
@@ -217,7 +180,7 @@ public class InventoryCLI {
 		while (true) {
 
 			String name = inputString("商品名");
-			if (!repo.productExist(name)) {
+			if (!productRepo.productExistByName(name)) {
 				System.out.println("入力された名前の商品は存在しません");
 				continue;
 			}
@@ -238,7 +201,7 @@ public class InventoryCLI {
 				}
 
 				if (amountAdd > 0) {
-					if (repo.findProduct(name).addProductStock(amountAdd)) {
+					if (productRepo.findProduct(name).addProductStock(amountAdd)) {
 						System.out.println("在庫を追加しました");
 						break;
 					} else {
@@ -267,7 +230,7 @@ public class InventoryCLI {
 			}
 
 			if (amountRemove > 0) {
-				if (repo.findProduct(name).removeProductStock(amountRemove)) {
+				if (productRepo.findProduct(name).removeProductStock(amountRemove)) {
 					System.out.println("在庫を削減しました");
 					break;
 				} else {
@@ -293,9 +256,9 @@ public class InventoryCLI {
 				//商品名からの検索
 				System.out.println("商品名から検索を行います");
 				String keywordName = inputString("キーワード");
-				if (repo.productNameKeywordExist(keywordName)) {
+				if (productRepo.productNameKeywordExist(keywordName)) {
 					System.out.println("キーワードに一致する商品が見つかりました");
-					repo.findProductByNameKeyword(keywordName);
+					productRepo.findProductByNameKeyword(keywordName);
 					break;
 				}
 
@@ -312,9 +275,9 @@ public class InventoryCLI {
 			//IDからの検索
 			System.out.println("IDから検索を行います");
 			String keywordID = inputString("キーワード");
-			if (repo.productIdKeywordExist(keywordID)) {
+			if (productRepo.productIdKeywordExist(keywordID)) {
 				System.out.println("キーワードに一致する商品が見つかりました");
-				repo.findProductByIdKeyword(keywordID);
+				productRepo.findProductByIdKeyword(keywordID);
 			}
 
 			System.out.println("キーワードに一致する商品は見つかりませんでした");
@@ -334,7 +297,7 @@ public class InventoryCLI {
 			String oldName = inputString("商品名");
 
 			String newName = inputString("変更後の商品名");
-			if (!repo.changeProductName(oldName, newName)) {
+			if (!productRepo.changeProductName(oldName, newName)) {
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
 					continue;
@@ -352,7 +315,7 @@ public class InventoryCLI {
 		System.out.println("===商品削除===");
 		while (true) {
 			String name = inputString("商品名");
-			if (!repo.productExist(name)) {
+			if (!productRepo.productExistByName(name)) {
 				System.out.println("入力された名前の商品は存在しません");
 				if (confirm("入力をやり直しますか？")) {
 					System.out.println("入力をやり直します");
@@ -367,9 +330,20 @@ public class InventoryCLI {
 				System.out.println("選択画面に戻ります");
 				break;
 			}
-			repo.removeProduct(name);
+
+			int internalProductId = productRepo.getInternalProductIdByProductName(name);
+
+			productRepo.removeProduct(name);
 			System.out.println("商品を削除しました");
 
+			if (recipeRepo.confirmRecipeByInternalProductId(internalProductId)) {
+				recipeRepo.removeRecipe(internalProductId);
+				System.out.println("登録されていたレシピも削除されました");
+				break;
+			}
+
+			System.out.println("商品のレシピは未登録だったため、レシピ削除は行いませんでした");
+			System.out.println("選択画面に戻ります");
 			break;
 		}
 	}
