@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProductRepository {
-	private Map<Integer, Product> productByInternalProductId = new HashMap<>(); //内部IDから商品を得るハッシュマップ
-	private Map<String, Integer> internalProductIdByName = new HashMap<>(); //名前から内部Idを得るハッシュマップ
+	Map<Integer, Product> productByInternalProductId = new HashMap<>(); //内部IDから商品を得るハッシュマップ
+	Map<String, Integer> internalProductIdByName = new HashMap<>(); //名前から内部Idを得るハッシュマップ
 	private int count = 0; //内部IDの作成に使用する
 
 	//内部IDの作成
@@ -82,13 +82,6 @@ public class ProductRepository {
 			if (p.getProductId().toLowerCase().contains(keyword.toLowerCase())) {
 				System.out.println(p);
 			}
-		}
-	}
-
-	//すべての商品データを表示する
-	public void showProduct() {
-		for (Product p : productByInternalProductId.values()) {
-			System.out.println(p);
 		}
 	}
 

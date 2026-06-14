@@ -145,8 +145,9 @@ public class MaterialRepository {
 
 	//名前にキーワードを含む材料の表示
 	public void findMaterialByNameKeyword(String keyword) {
+		String lowerKeyword = keyword.toLowerCase();
 		for (Material m : materialByInternalMaterialId.values()) {
-			if (m.getMaterialName().toLowerCase().contains(keyword)) {
+			if (m.getMaterialName().toLowerCase().contains(lowerKeyword)) {
 				System.out.println(m);
 			}
 		}
@@ -154,8 +155,9 @@ public class MaterialRepository {
 
 	//IDにキーワードを含む材料の表示
 	public void findMaterialByIdKeyword(String keyword) {
+		String lowerKeyword = keyword.toLowerCase();
 		for (Material m : materialByInternalMaterialId.values()) {
-			if (m.getMaterialId().toLowerCase().contains(keyword)) {
+			if (m.getMaterialId().toLowerCase().contains(lowerKeyword)) {
 				System.out.println(m);
 			}
 		}

@@ -23,6 +23,11 @@ public class MaterialInventoryCLI {
 				continue;
 			}
 
+			if (input.contains(",")) {
+				System.out.println(",（カンマ）は使用しないでください");
+				continue;
+			}
+
 			try {
 				return Integer.parseInt(input);
 			} catch (NumberFormatException e) {
@@ -35,6 +40,12 @@ public class MaterialInventoryCLI {
 		System.out.println(message + ":");
 		while (true) {
 			String input = sc.nextLine();
+
+			if (input.contains(",")) {
+				System.out.println(",（カンマ）は使用しないでください");
+				continue;
+			}
+
 			if (input.trim().isEmpty()) {
 				System.out.println(message + "は空欄にはできません");
 				System.out.println(message + ":");
@@ -64,12 +75,7 @@ public class MaterialInventoryCLI {
 		return materialRepo;
 	}
 
-	public void saveMaterial() {
-		materialRepo.saveToFile();
-	}
-
 	public void Start() {
-		materialRepo.loadFromFile();
 
 		while (true) {
 			System.out.println("1:材料一覧　2:材料追加　3:在庫の追加・削減　4:キーワード検索　5:材料名変更　6:材料削除　7:在庫切れの材料一覧　0:戻る");
@@ -199,6 +205,16 @@ public class MaterialInventoryCLI {
 
 				//在庫の増加を選んだ場合
 				int amountAdd = inputInt("追加数を入力してください");
+				if (amountAdd <= 0) {
+					System.out.println("追加数は正の値を入力してください");
+					if (confirm("入力をやり直しますか？")) {
+						System.out.println("入力をやり直します");
+						continue;
+					} else {
+						System.out.println("選択画面に戻ります");
+						break;
+					}
+				}
 
 				if (!confirm("材料名:" + name + "   追加数:" + amountAdd + "でよろしいですか？")) {
 					if (confirm("入力をやり直しますか？")) {
@@ -210,18 +226,8 @@ public class MaterialInventoryCLI {
 					}
 				}
 
-				if (amountAdd > 0) {
-					if (materialRepo.addMaterialStock(name, amountAdd)) {
-						break;
-					} else {
-						if (confirm("入力をやり直しますか？")) {
-							System.out.println("入力をやり直します");
-							continue;
-						} else {
-							System.out.println("選択画面に戻ります");
-							break;
-						}
-					}
+				if (materialRepo.addMaterialStock(name, amountAdd)) {
+					break;
 				}
 			}
 
@@ -265,16 +271,17 @@ public class MaterialInventoryCLI {
 					System.out.println("キーワードに一致する材料が見つかりました");
 					materialRepo.findMaterialByNameKeyword(keywordName);
 					break;
+				} else {
+					System.out.println("キーワードに一致する材料は見つかりませんでした");
+					if (confirm("入力をやり直しますか？")) {
+						System.out.println("入力をやり直します");
+						continue;
+					} else {
+						System.out.println("選択画面に戻ります");
+						break;
+					}
 				}
 
-				System.out.println("キーワードに一致する材料は見つかりませんでした");
-				if (confirm("入力をやり直しますか？")) {
-					System.out.println("入力をやり直します");
-					continue;
-				} else {
-					System.out.println("選択画面に戻ります");
-					break;
-				}
 			}
 
 			//IDからの検索
@@ -283,15 +290,16 @@ public class MaterialInventoryCLI {
 			if (materialRepo.materialIdKeywordExist(keywordID)) {
 				System.out.println("キーワードに一致する材料が見つかりました");
 				materialRepo.findMaterialByIdKeyword(keywordID);
-			}
-
-			System.out.println("キーワードに一致する材料は見つかりませんでした");
-			if (confirm("入力をやり直しますか？")) {
-				System.out.println("入力をやり直します");
-				continue;
-			} else {
-				System.out.println("選択画面に戻ります");
 				break;
+			} else {
+				System.out.println("キーワードに一致する材料は見つかりませんでした");
+				if (confirm("入力をやり直しますか？")) {
+					System.out.println("入力をやり直します");
+					continue;
+				} else {
+					System.out.println("選択画面に戻ります");
+					break;
+				}
 			}
 		}
 	}

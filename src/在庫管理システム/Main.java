@@ -10,18 +10,23 @@ public class Main {
 		ProductRepository productRepo = new ProductRepository();
 		MaterialRepository materialRepo = new MaterialRepository();
 		RecipeRepository recipeRepo = new RecipeRepository();
+		EcSiteRepository ecSiteRepo = new EcSiteRepository();
+		EcListingRepository ecListingRepo = new EcListingRepository();
 
-		InventoryCLI cli = new InventoryCLI(productRepo, recipeRepo);
+		InventoryCLI cli = new InventoryCLI(productRepo, recipeRepo, ecSiteRepo, ecListingRepo);
 		MaterialInventoryCLI mateCli = new MaterialInventoryCLI(materialRepo, recipeRepo);
 		RecipeCLI reciCli = new RecipeCLI(productRepo, materialRepo, recipeRepo);
-		AnalysisCLI anaCli = new AnalysisCLI(productRepo, materialRepo, recipeRepo);
+		AnalysisCLI anaCli = new AnalysisCLI(productRepo, materialRepo, recipeRepo, ecSiteRepo, ecListingRepo);
+		EcSiteCLI ecCli = new EcSiteCLI(productRepo, materialRepo, ecSiteRepo, ecListingRepo);
 
 		productRepo.loadFromFile();
 		materialRepo.loadFromFile();
 		recipeRepo.loadFromFile();
+		ecSiteRepo.loadFromFile();
+		ecListingRepo.loadFromFile();
 
 		while (true) {
-			System.out.println("1:商品の操作　2:材料の操作　3:レシピの操作　4:便利な機能　0:終了");
+			System.out.println("1:商品の操作　2:材料の操作　3:レシピの操作　4:ECサイトの管理　5:便利な機能　0:終了");
 
 			String choiceStr = sc.nextLine();
 			int choice;
@@ -50,6 +55,11 @@ public class Main {
 
 			case 4:
 
+				ecCli.ecSiteStart();
+				break;
+
+			case 5:
+
 				anaCli.analysisStart();
 				break;
 
@@ -59,6 +69,8 @@ public class Main {
 				productRepo.saveToFile();
 				materialRepo.saveToFile();
 				recipeRepo.saveToFile();
+				ecSiteRepo.saveToFile();
+				ecListingRepo.saveToFile();
 				sc.close();
 				return;
 

@@ -1,5 +1,6 @@
 package 在庫管理システム;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -11,11 +12,16 @@ public class AnalysisCLI {
 	private ProductRepository productRepo;
 	private MaterialRepository materialRepo;
 	private RecipeRepository recipeRepo;
+	private EcSiteRepository ecSiteRepo;
+	private EcListingRepository ecListingRepo;
 
-	public AnalysisCLI(ProductRepository productRepo, MaterialRepository materialRepo, RecipeRepository recipeRepo) {
+	public AnalysisCLI(ProductRepository productRepo, MaterialRepository materialRepo, RecipeRepository recipeRepo,
+			EcSiteRepository ecSiteRepo, EcListingRepository ecListingRepo) {
 		this.productRepo = productRepo;
 		this.materialRepo = materialRepo;
 		this.recipeRepo = recipeRepo;
+		this.ecSiteRepo = ecSiteRepo;
+		this.ecListingRepo = ecListingRepo;
 	}
 
 	private int inputInt(String message) {
@@ -25,6 +31,11 @@ public class AnalysisCLI {
 
 			if (input.trim().isEmpty()) {
 				System.out.println("値を入力してください");
+				continue;
+			}
+
+			if (input.contains(",")) {
+				System.out.println(",（カンマ）は使用しないでください");
 				continue;
 			}
 
@@ -40,6 +51,12 @@ public class AnalysisCLI {
 		System.out.println(message + ":");
 		while (true) {
 			String input = sc.nextLine();
+
+			if (input.contains(",")) {
+				System.out.println(",（カンマ）は使用しないでください");
+				continue;
+			}
+
 			if (input.trim().isEmpty()) {
 				System.out.println(message + "は空欄にはできません");
 				System.out.println(message + ":");
@@ -80,12 +97,12 @@ public class AnalysisCLI {
 
 			switch (choice) {
 
-			case 1: //レシピ追加
+			case 1: //材料から商品を検索する
 
 				showProductByInternalMaterial();
 				break;
 
-			case 2:
+			case 2: //必要な材料が切れてしまっている商品一覧
 
 				showProductMadeByNoStockMaterial();
 				break;
@@ -174,6 +191,19 @@ public class AnalysisCLI {
 		System.out.println("材料の在庫が切れている商品が見つかりました");
 		for (int internalProductId : affectedInternalProductIds) {
 			productRepo.showProductByInternalProductId(internalProductId);
+			HashMap<Integer, String> sellingStatusByinternalEcSiteId = ecListingRepo
+					.getInternalEcSiteIdAndSellingStatusByInternalProductId(internalProductId);
+			if (sellingStatusByinternalEcSiteId.isEmpty()) {
+				System.out.println("ECサイトでの販売は行われていません");
+			} else {
+				for (int internalEcSiteId : sellingStatusByinternalEcSiteId.keySet()) {
+					System.out
+							.println("ECサイト名:"
+									+ ecSiteRepo.ecSiteByInternalEcSiteId.get(internalEcSiteId).getEcSiteName()
+									+ "　販売状況:" + sellingStatusByinternalEcSiteId.get(internalEcSiteId));
+				}
+			}
+			System.out.println();
 		}
 		System.out.println("選択画面に戻ります");
 

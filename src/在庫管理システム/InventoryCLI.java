@@ -1,15 +1,21 @@
 package 在庫管理システム;
 
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class InventoryCLI {
 	private Scanner sc = new Scanner(System.in);
 	private ProductRepository productRepo;
 	private RecipeRepository recipeRepo;
+	private EcSiteRepository ecSiteRepo;
+	private EcListingRepository ecListingRepo;
 
-	public InventoryCLI(ProductRepository productRepo, RecipeRepository recipeRepo) {
+	public InventoryCLI(ProductRepository productRepo, RecipeRepository recipeRepo, EcSiteRepository ecSiteRepo,
+			EcListingRepository ecListingRepo) {
 		this.productRepo = productRepo;
 		this.recipeRepo = recipeRepo;
+		this.ecSiteRepo = ecSiteRepo;
+		this.ecListingRepo = ecListingRepo;
 	}
 
 	private int inputInt(String message) {
@@ -19,6 +25,11 @@ public class InventoryCLI {
 
 			if (input.trim().isEmpty()) {
 				System.out.println("値を入力してください");
+				continue;
+			}
+
+			if (input.contains(",")) {
+				System.out.println(",（カンマ）は使用しないでください");
 				continue;
 			}
 
@@ -34,6 +45,12 @@ public class InventoryCLI {
 		System.out.println(message + ":");
 		while (true) {
 			String input = sc.nextLine();
+
+			if (input.contains(",")) {
+				System.out.println(",（カンマ）は使用しないでください");
+				continue;
+			}
+
 			if (input.trim().isEmpty()) {
 				System.out.println(message + "は空欄にはできません");
 				System.out.println(message + ":");
@@ -41,6 +58,7 @@ public class InventoryCLI {
 			} else {
 				return input;
 			}
+
 		}
 
 	}
@@ -77,7 +95,7 @@ public class InventoryCLI {
 			case 1:
 
 				System.out.println("===商品一覧===");
-				productRepo.showProduct();
+				showProduct();
 				break;
 
 			case 2: //商品追加
@@ -120,6 +138,28 @@ public class InventoryCLI {
 				System.out.println("正しい数字を入力してください");
 			}
 		}
+	}
+
+	private void showProduct() {
+
+		for (Product p : productRepo.productByInternalProductId.values()) {
+			System.out.println(p);
+			int internalProductId = p.getInternalProductId();
+			HashMap<Integer, String> sellingStatusByinternalEcSiteId = ecListingRepo
+					.getInternalEcSiteIdAndSellingStatusByInternalProductId(internalProductId);
+			if (sellingStatusByinternalEcSiteId.isEmpty()) {
+				System.out.println("ECサイトでの販売は行われていません");
+			} else {
+				for (int internalEcSiteId : sellingStatusByinternalEcSiteId.keySet()) {
+					System.out
+							.println("ECサイト名:"
+									+ ecSiteRepo.ecSiteByInternalEcSiteId.get(internalEcSiteId).getEcSiteName()
+									+ "　販売状況:" + sellingStatusByinternalEcSiteId.get(internalEcSiteId));
+				}
+			}
+			System.out.println();
+		}
+
 	}
 
 	private void addProduct() {
@@ -189,6 +229,16 @@ public class InventoryCLI {
 
 				//在庫の増加を選んだ場合
 				int amountAdd = inputInt("追加数を入力してください");
+				if (amountAdd <= 0) {
+					System.out.println("追加数は正の値を入力してください");
+					if (confirm("入力をやり直しますか？")) {
+						System.out.println("入力をやり直します");
+						continue;
+					} else {
+						System.out.println("選択画面に戻ります");
+						break;
+					}
+				}
 
 				if (!confirm("商品名:" + name + "   追加数:" + amountAdd + "でよろしいですか？")) {
 					if (confirm("入力をやり直しますか？")) {
@@ -200,20 +250,9 @@ public class InventoryCLI {
 					}
 				}
 
-				if (amountAdd > 0) {
-					if (productRepo.findProduct(name).addProductStock(amountAdd)) {
-						System.out.println("在庫を追加しました");
-						break;
-					} else {
-						System.out.println("0より大きい値を入れてください");
-						if (confirm("入力をやり直しますか？")) {
-							System.out.println("入力をやり直します");
-							continue;
-						} else {
-							System.out.println("選択画面に戻ります");
-							break;
-						}
-					}
+				if (productRepo.findProduct(name).addProductStock(amountAdd)) {
+					System.out.println("在庫を追加しました");
+					break;
 				}
 			}
 
@@ -260,15 +299,15 @@ public class InventoryCLI {
 					System.out.println("キーワードに一致する商品が見つかりました");
 					productRepo.findProductByNameKeyword(keywordName);
 					break;
-				}
-
-				System.out.println("キーワードに一致する商品は見つかりませんでした");
-				if (confirm("入力をやり直しますか？")) {
-					System.out.println("入力をやり直します");
-					continue;
 				} else {
-					System.out.println("選択画面に戻ります");
-					break;
+					System.out.println("キーワードに一致する商品は見つかりませんでした");
+					if (confirm("入力をやり直しますか？")) {
+						System.out.println("入力をやり直します");
+						continue;
+					} else {
+						System.out.println("選択画面に戻ります");
+						break;
+					}
 				}
 			}
 
@@ -278,15 +317,16 @@ public class InventoryCLI {
 			if (productRepo.productIdKeywordExist(keywordID)) {
 				System.out.println("キーワードに一致する商品が見つかりました");
 				productRepo.findProductByIdKeyword(keywordID);
-			}
-
-			System.out.println("キーワードに一致する商品は見つかりませんでした");
-			if (confirm("入力をやり直しますか？")) {
-				System.out.println("入力をやり直します");
-				continue;
-			} else {
-				System.out.println("選択画面に戻ります");
 				break;
+			} else {
+				System.out.println("キーワードに一致する商品は見つかりませんでした");
+				if (confirm("入力をやり直しますか？")) {
+					System.out.println("入力をやり直します");
+					continue;
+				} else {
+					System.out.println("選択画面に戻ります");
+					break;
+				}
 			}
 		}
 	}
@@ -335,6 +375,12 @@ public class InventoryCLI {
 
 			productRepo.removeProduct(name);
 			System.out.println("商品を削除しました");
+
+			if (ecListingRepo.removeProductFromAllEcSite(internalProductId)) {
+				System.out.println("登録していたECサイトからも商品が削除されました");
+			} else {
+				System.out.println("商品が登録されているECサイトはなかったため、ECサイトからの削除は行われませんでした");
+			}
 
 			if (recipeRepo.confirmRecipeByInternalProductId(internalProductId)) {
 				recipeRepo.removeRecipe(internalProductId);
