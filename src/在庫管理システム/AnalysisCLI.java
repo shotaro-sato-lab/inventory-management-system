@@ -163,8 +163,20 @@ public class AnalysisCLI {
 
 		for (int internalProductId : recipeRepo.findInternalProductIdByInternalMaterialId(internalMaterialId)) {
 			productRepo.showProductByInternalProductId(internalProductId);
+			HashMap<Integer, String> sellingStatusByinternalEcSiteId = ecListingRepo
+					.getInternalEcSiteIdAndSellingStatusByInternalProductId(internalProductId);
+			if (sellingStatusByinternalEcSiteId.isEmpty()) {
+				System.out.println("ECサイトでの販売は行われていません");
+			} else {
+				for (int internalEcSiteId : sellingStatusByinternalEcSiteId.keySet()) {
+					System.out
+							.println("ECサイト名:"
+									+ ecSiteRepo.ecSiteByInternalEcSiteId.get(internalEcSiteId).getEcSiteName()
+									+ "　販売状況:" + sellingStatusByinternalEcSiteId.get(internalEcSiteId));
+				}
+			}
+			System.out.println();
 		}
-
 	}
 
 	public void showProductMadeByNoStockMaterial() {
